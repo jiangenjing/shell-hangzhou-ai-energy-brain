@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#141414" />
+  <meta name="description" content="壳牌杭州 AI 智充小程序概念原型" />
+  <title>壳牌杭州 AI 智充</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23FFD500'/%3E%3Cpath d='M34 10 18 35h12l-2 19 18-28H34z' fill='%23D71920'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --ink: #171717;
+      --muted: #6f6f6f;
+      --line: #e7e4de;
+      --paper: #fffdfa;
+      --soft: #f5f3ee;
+      --yellow: #ffd500;
+      --yellow-soft: #fff3aa;
+      --red: #d71920;
+      --green: #087f5b;
+      --green-soft: #def7eb;
+      --orange: #b85100;
+      --shadow: 0 24px 70px rgba(25, 21, 10, 0.16);
+      font-family: Inter, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: #efede7;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 16%, rgba(255, 213, 0, .26), transparent 25rem),
+        radial-gradient(circle at 88% 80%, rgba(215, 25, 32, .10), transparent 26rem),
+        #efede7;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .workspace {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(420px, 1fr) 390px minmax(360px, 0.85fr);
+      gap: 34px;
+      align-items: center;
+      padding: 32px 4vw;
+    }
+
+    .story-panel { max-width: 570px; justify-self: end; }
+    .story-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      font-size: .85rem;
+      font-weight: 750;
+      letter-spacing: .08em;
+      color: #7b6800;
+      text-transform: uppercase;
+    }
+    .story-kicker::before { content: ""; width: 28px; height: 3px; background: var(--red); border-radius: 2px; }
+    .story-panel h1 { margin: 0 0 18px; font-size: clamp(2.5rem, 4vw, 4.8rem); line-height: .98; letter-spacing: -.055em; }
+    .story-panel h1 span { color: var(--red); }
+    .story-panel > p { max-width: 520px; margin: 0; color: #535353; font-size: 1.08rem; line-height: 1.8; }
+    .journey-summary { margin-top: 34px; display: grid; gap: 9px; }
+    .journey-step {
+      display: grid;
+      grid-template-columns: 42px 92px 1fr;
+      align-items: center;
+      min-height: 46px;
+      padding: 0 14px 0 0;
+      border-bottom: 1px solid rgba(23,23,23,.10);
+      color: #696969;
+      transition: .25s ease;
+    }
+    .journey-step.active { color: var(--ink); transform: translateX(8px); border-color: var(--red); }
+    .journey-step .num { font-weight: 800; color: var(--red); }
+    .journey-step strong { font-size: .93rem; }
+    .journey-step span:last-child { font-size: .88rem; }
+
+    .device {
+      width: 390px;
+      height: min(844px, calc(100vh - 40px));
+      min-height: 690px;
+      position: relative;
+      overflow: hidden;
+      border: 9px solid #1c1c1c;
+      border-radius: 42px;
+      background: var(--paper);
+      box-shadow: var(--shadow), inset 0 0 0 1px rgba(255,255,255,.4);
+    }
+    .device::before {
+      content: "";
+      position: absolute;
+      z-index: 20;
+      top: 9px;
+      left: 50%;
+      width: 98px;
+      height: 25px;
+      transform: translateX(-50%);
+      background: #1c1c1c;
+      border-radius: 0 0 17px 17px;
+    }
+    .statusbar {
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 21px 0;
+      font-size: .72rem;
+      font-weight: 760;
+      background: var(--paper);
+    }
+    .status-icons { display: flex; gap: 5px; align-items: center; }
+    .signal { display: flex; align-items: end; gap: 2px; height: 10px; }
+    .signal i { width: 2px; background: #222; border-radius: 2px; }
+    .signal i:nth-child(1){height:4px}.signal i:nth-child(2){height:6px}.signal i:nth-child(3){height:8px}.signal i:nth-child(4){height:10px}
+    .battery-icon { width: 18px; height: 9px; border: 1.5px solid #222; border-radius: 2px; position: relative; }
+    .battery-icon::before { content:""; position:absolute; inset:1.5px; width:11px; background:#222; border-radius:1px; }
+    .battery-icon::after { content:""; position:absolute; right:-3px; top:2px; width:2px; height:4px; background:#222; border-radius:0 1px 1px 0; }
+
+    .app-header {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 18px 10px;
+      background: var(--paper);
+      border-bottom: 1px solid rgba(0,0,0,.04);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-mark {
+      width: 34px; height: 34px; display: grid; place-items: center;
+      border-radius: 50%; background: var(--yellow); position: relative; overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(196,151,0,.18);
+    }
+    .brand-mark::after { content:""; width:10px; height:20px; background:var(--red); clip-path:polygon(55% 0,100% 0,65% 42%,100% 42%,20% 100%,38% 55%,0 55%); }
+    .brand-name { font-size: .95rem; font-weight: 830; letter-spacing: -.02em; }
+    .brand-sub { color: var(--muted); font-size: .67rem; margin-top: 2px; }
+    .header-button {
+      width: 36px; height: 36px; display:grid; place-items:center; border:0; border-radius:50%; background:var(--soft); color:var(--ink);
+    }
+    .header-button svg { width:19px; height:19px; }
+
+    .viewport {
+      height: calc(100% - 35px - 58px - 68px);
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
+    }
+    .viewport::-webkit-scrollbar { display:none; }
+    .screen { padding: 18px 16px 26px; animation: enter .28s ease both; }
+    @keyframes enter { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+    .screen-title { margin: 2px 0 4px; font-size: 1.55rem; line-height: 1.15; letter-spacing: -.04em; }
+    .screen-subtitle { margin: 0 0 17px; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+
+    .location-line { display:flex; align-items:center; gap:5px; color:#4f4f4f; font-size:.78rem; font-weight:650; margin-bottom:14px; }
+    .location-line svg { width:15px; height:15px; color:var(--red); }
+    .hero-card {
+      position: relative;
+      min-height: 196px;
+      overflow: hidden;
+      border-radius: 25px;
+      padding: 19px;
+      color: white;
+      background:
+        radial-gradient(circle at 85% 25%, rgba(255,213,0,.50), transparent 7rem),
+        linear-gradient(140deg, #191919 0%, #272727 68%, #4b2900 100%);
+    }
+    .hero-card::after {
+      content:""; position:absolute; right:-44px; bottom:-55px; width:175px; height:175px; border:28px solid rgba(255,213,0,.16); border-radius:50%;
+    }
+    .eyebrow { font-size:.7rem; letter-spacing:.08em; font-weight:760; color:#d6d6d6; }
+    .hero-row { display:flex; justify-content:space-between; align-items:end; margin-top:14px; position:relative; z-index:1; }
+    .soc { font-size:3.4rem; line-height:.9; font-weight:840; letter-spacing:-.07em; }
+    .soc small { font-size:1.1rem; color:var(--yellow); }
+    .range { text-align:right; font-size:.75rem; color:#cacaca; }
+    .range strong { display:block; color:white; font-size:1.15rem; margin-top:3px; }
+    .need-line { margin-top:17px; padding-top:13px; border-top:1px solid rgba(255,255,255,.16); display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; }
+    .need-line span { font-size:.78rem; color:#d8d8d8; }
+    .need-line strong { font-size:.88rem; }
+    .hero-button { margin-top:13px; width:100%; height:42px; border:0; border-radius:14px; background:var(--yellow); color:#171717; font-weight:830; position:relative; z-index:1; }
+
+    .section-head { display:flex; align-items:end; justify-content:space-between; margin:22px 2px 10px; }
+    .section-head h2 { margin:0; font-size:1.03rem; letter-spacing:-.02em; }
+    .section-head button { border:0; background:none; color:var(--red); padding:0; font-size:.75rem; font-weight:700; }
+    .station-card { border:1px solid var(--line); border-radius:20px; padding:15px; background:white; box-shadow:0 10px 30px rgba(32,27,15,.05); }
+    .station-top { display:flex; justify-content:space-between; gap:12px; }
+    .station-top h3 { margin:0; font-size:.94rem; line-height:1.35; }
+    .station-top p { margin:5px 0 0; color:var(--muted); font-size:.72rem; }
+    .score { width:50px; height:50px; display:grid; place-items:center; flex:none; border-radius:50%; background:var(--green-soft); color:var(--green); font-size:.7rem; text-align:center; line-height:1.05; }
+    .score strong { display:block; font-size:1.05rem; }
+    .reason { margin:13px 0 12px; padding:10px 11px; border-radius:12px; background:#fff8d8; font-size:.72rem; line-height:1.5; color:#604f00; }
+    .station-metrics { display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--line); padding-top:11px; }
+    .metric { text-align:center; border-right:1px solid var(--line); }
+    .metric:last-child { border:0; }
+    .metric strong { display:block; font-size:.84rem; }
+    .metric span { color:var(--muted); font-size:.63rem; }
+    .station-actions { display:grid; grid-template-columns:1fr 1.5fr; gap:9px; margin-top:13px; }
+    .btn { min-height:42px; border-radius:13px; border:1px solid var(--line); background:white; font-weight:760; font-size:.82rem; color:var(--ink); }
+    .btn.primary { border-color:var(--red); background:var(--red); color:white; }
+    .btn.dark { border-color:#1a1a1a; background:#1a1a1a; color:white; }
+    .btn.yellow { border-color:var(--yellow); background:var(--yellow); color:#171717; }
+    .btn:focus-visible, .choice:focus-visible, .nav-item:focus-visible { outline:3px solid rgba(215,25,32,.28); outline-offset:2px; }
+
+    .quick-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+    .quick { border:0; background:white; border-radius:16px; min-height:75px; padding:10px 4px; color:var(--ink); box-shadow:0 6px 18px rgba(20,20,20,.04); }
+    .quick-icon { width:30px; height:30px; margin:0 auto 6px; display:grid; place-items:center; border-radius:10px; background:var(--soft); color:var(--red); }
+    .quick-icon svg { width:17px; height:17px; }
+    .quick span { display:block; font-size:.68rem; font-weight:690; }
+    .campaign-card { border-radius:20px; padding:15px; background:linear-gradient(125deg,#fff0a1,#ffe54d); display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .campaign-card .tag { display:inline-block; padding:4px 7px; border-radius:99px; background:rgba(255,255,255,.7); font-size:.62rem; font-weight:760; color:#6b5600; }
+    .campaign-card h3 { margin:8px 0 4px; font-size:.98rem; }
+    .campaign-card p { margin:0; font-size:.68rem; line-height:1.45; color:#6e5900; }
+    .campaign-value { min-width:70px; text-align:center; font-size:.65rem; }
+    .campaign-value strong { display:block; font-size:1.45rem; color:var(--red); }
+
+    .profile-strip { display:flex; gap:8px; overflow:auto; padding-bottom:3px; scrollbar-width:none; }
+    .profile-strip::-webkit-scrollbar{display:none}
+    .choice { white-space:nowrap; border:1px solid var(--line); background:white; padding:9px 12px; border-radius:99px; font-size:.74rem; color:#555; }
+    .choice.selected { border-color:#1c1c1c; background:#1c1c1c; color:white; }
+    .vehicle-card { display:flex; justify-content:space-between; gap:12px; align-items:center; background:var(--soft); border-radius:18px; padding:14px; margin-bottom:14px; }
+    .vehicle-card strong { font-size:.86rem; display:block; }
+    .vehicle-card span { font-size:.7rem; color:var(--muted); }
+    .mini-car { width:54px; height:28px; border-radius:14px 19px 8px 8px; background:#252525; position:relative; }
+    .mini-car::before { content:""; position:absolute; left:9px; top:-9px; width:34px; height:16px; background:#252525; border-radius:16px 17px 0 0; }
+    .mini-car::after { content:""; position:absolute; left:8px; bottom:-4px; width:9px; height:9px; border-radius:50%; background:#686868; box-shadow:29px 0 #686868; }
+    .match-card { background:white; border:1px solid var(--line); border-radius:18px; padding:14px; margin-bottom:10px; }
+    .match-card.recommended { border-color:#d9b700; box-shadow:inset 3px 0 var(--yellow); }
+    .match-rank { display:flex; gap:11px; }
+    .rank-num { width:28px; height:28px; border-radius:9px; display:grid; place-items:center; flex:none; background:var(--soft); font-size:.78rem; font-weight:830; }
+    .recommended .rank-num { background:var(--yellow); }
+    .match-main { flex:1; min-width:0; }
+    .match-title { display:flex; justify-content:space-between; gap:8px; }
+    .match-title h3 { margin:0; font-size:.86rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .match-title strong { font-size:.83rem; color:var(--green); }
+    .match-line { margin-top:5px; color:var(--muted); font-size:.67rem; line-height:1.45; }
+    .why { margin-top:10px; display:flex; gap:5px; flex-wrap:wrap; }
+    .why span { padding:4px 7px; border-radius:7px; background:#f4f2ec; font-size:.61rem; color:#555; }
+
+    .detail-hero { height:142px; position:relative; overflow:hidden; border-radius:22px; padding:16px; color:white; background:linear-gradient(145deg,#1b1b1b,#363636); }
+    .map-road { position:absolute; height:7px; background:#5a5a5a; border-radius:8px; transform:rotate(-18deg); }
+    .map-road.r1 { width:250px; left:-32px; top:78px; }
+    .map-road.r2 { width:190px; right:-48px; top:46px; transform:rotate(52deg); }
+    .map-road.r3 { width:170px; left:80px; bottom:9px; transform:rotate(8deg); }
+    .station-pin { position:absolute; right:76px; top:48px; width:37px; height:37px; border-radius:50% 50% 50% 8px; transform:rotate(-45deg); background:var(--yellow); box-shadow:0 0 0 8px rgba(255,213,0,.18); }
+    .station-pin::after { content:""; position:absolute; inset:11px; background:var(--red); border-radius:50%; }
+    .detail-hero h2 { position:relative; z-index:2; margin:0; font-size:1rem; width:180px; }
+    .detail-hero p { position:relative; z-index:2; margin:5px 0 0; font-size:.67rem; color:#d3d3d3; }
+    .availability { display:flex; align-items:center; gap:9px; margin-top:-22px; position:relative; z-index:3; width:calc(100% - 24px); margin-left:auto; margin-right:auto; border-radius:17px; background:white; padding:12px; box-shadow:0 10px 24px rgba(0,0,0,.10); }
+    .availability strong { color:var(--green); font-size:1.25rem; }
+    .availability div span { display:block; font-size:.68rem; color:var(--muted); }
+    .availability .wait { margin-left:auto; text-align:right; }
+    .availability .wait strong { color:var(--ink); font-size:.85rem; }
+    .price-timeline { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; }
+    .price-slot { border-radius:11px; background:var(--soft); padding:9px 4px; text-align:center; }
+    .price-slot.best { background:var(--green-soft); color:var(--green); }
+    .price-slot strong { display:block; font-size:.74rem; }
+    .price-slot span { font-size:.58rem; color:inherit; opacity:.8; }
+    .facility-list { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+    .facility { padding:10px 3px; border:1px solid var(--line); border-radius:12px; text-align:center; font-size:.64rem; background:white; }
+    .facility b { display:block; margin-bottom:3px; color:var(--red); font-size:.78rem; }
+    .sticky-actions { position:sticky; bottom:-26px; margin:24px -16px -26px; padding:12px 16px calc(12px + env(safe-area-inset-bottom)); background:rgba(255,253,250,.94); backdrop-filter:blur(12px); border-top:1px solid var(--line); display:grid; grid-template-columns:.8fr 1.5fr; gap:9px; z-index:8; }
+
+    .charge-center { text-align:center; padding-top:7px; }
+    .charge-ring { width:190px; height:190px; margin:6px auto 14px; border-radius:50%; display:grid; place-items:center; background:conic-gradient(var(--yellow) calc(var(--charge) * 1%), #ece9e1 0); position:relative; transition:.4s ease; }
+    .charge-ring::before { content:""; position:absolute; inset:14px; border-radius:50%; background:var(--paper); }
+    .charge-value { position:relative; z-index:2; }
+    .charge-value strong { display:block; font-size:3.3rem; line-height:.95; letter-spacing:-.07em; }
+    .charge-value span { color:var(--muted); font-size:.72rem; }
+    .charge-stats { display:grid; grid-template-columns:repeat(3,1fr); background:#1b1b1b; color:white; border-radius:18px; padding:14px 4px; }
+    .charge-stats div { border-right:1px solid #404040; }
+    .charge-stats div:last-child { border:0; }
+    .charge-stats strong { display:block; font-size:1rem; }
+    .charge-stats span { color:#aaa; font-size:.61rem; }
+    .power-chart { height:92px; display:flex; align-items:end; gap:3px; padding:9px 0 2px; border-bottom:1px solid var(--line); }
+    .power-chart i { flex:1; min-width:3px; background:linear-gradient(to top,var(--red),#ff9d75); border-radius:4px 4px 0 0; opacity:.88; }
+    .ai-note { display:flex; gap:10px; padding:12px; background:#fff5bf; border-radius:15px; color:#564500; font-size:.69rem; line-height:1.5; text-align:left; }
+    .ai-dot { width:28px; height:28px; display:grid; place-items:center; flex:none; border-radius:50%; background:var(--yellow); font-weight:850; color:var(--red); }
+
+    .activity-hero { border-radius:23px; padding:18px; background:linear-gradient(135deg,#d71920,#8f0710); color:white; position:relative; overflow:hidden; }
+    .activity-hero::after { content:""; position:absolute; right:-35px; top:-45px; width:150px; height:150px; border:24px solid rgba(255,213,0,.25); border-radius:50%; }
+    .activity-hero .label { font-size:.66rem; color:#ffd5d6; }
+    .activity-hero h2 { margin:8px 0 6px; font-size:1.35rem; position:relative; z-index:1; }
+    .activity-hero p { margin:0; max-width:230px; color:#ffd8da; font-size:.72rem; line-height:1.55; position:relative; z-index:1; }
+    .reward-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .reward { border:1px solid var(--line); background:white; border-radius:18px; padding:14px; text-align:left; position:relative; min-height:115px; }
+    .reward.selected { border:2px solid var(--red); padding:13px; }
+    .reward small { color:var(--muted); font-size:.62rem; }
+    .reward strong { display:block; font-size:1rem; margin:8px 0 4px; }
+    .reward span { color:var(--red); font-size:.68rem; font-weight:700; }
+    .reward .check { display:none; position:absolute; right:10px; top:10px; width:19px; height:19px; border-radius:50%; background:var(--red); color:white; text-align:center; line-height:19px; font-size:.68rem; }
+    .reward.selected .check { display:block; }
+    .explain-box { border:1px dashed #cdbb58; background:#fff9d9; border-radius:16px; padding:12px; font-size:.68rem; line-height:1.55; color:#5e510f; }
+
+    .profile-hero { padding:17px; border-radius:22px; background:#1b1b1b; color:white; }
+    .profile-top { display:flex; align-items:center; gap:12px; }
+    .avatar { width:48px; height:48px; border-radius:50%; background:var(--yellow); color:var(--red); display:grid; place-items:center; font-size:1.2rem; font-weight:850; }
+    .profile-top h2 { margin:0; font-size:1rem; }
+    .profile-top p { margin:4px 0 0; color:#bcbcbc; font-size:.68rem; }
+    .profile-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; }
+    .profile-tags span { padding:5px 8px; border-radius:99px; background:#343434; color:#e7e7e7; font-size:.62rem; }
+    .summary-row { display:grid; grid-template-columns:repeat(3,1fr); margin-top:13px; padding-top:13px; border-top:1px solid #393939; }
+    .summary-row div { text-align:center; }
+    .summary-row strong { display:block; font-size:.95rem; }
+    .summary-row span { color:#aaa; font-size:.6rem; }
+    .list-card { border:1px solid var(--line); border-radius:18px; background:white; overflow:hidden; }
+    .list-row { min-height:54px; display:flex; align-items:center; gap:10px; padding:10px 13px; border-bottom:1px solid var(--line); }
+    .list-row:last-child { border:0; }
+    .list-icon { width:30px; height:30px; display:grid; place-items:center; border-radius:9px; background:var(--soft); color:var(--red); font-size:.68rem; font-weight:800; }
+    .list-row div:nth-child(2) { flex:1; }
+    .list-row strong { display:block; font-size:.78rem; }
+    .list-row span { display:block; color:var(--muted); font-size:.63rem; margin-top:2px; }
+    .chev { color:#aaa; }
+    button.list-row { width:100%; border:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
+    button.list-row:active { background:rgba(60,60,67,.06); }
+    .switch { width:39px; height:22px; border-radius:99px; background:#dedbd5; padding:3px; border:0; }
+    .switch::before { content:""; display:block; width:16px; height:16px; border-radius:50%; background:white; transition:.2s; box-shadow:0 2px 5px rgba(0,0,0,.15); }
+    .switch.on { background:var(--green); }
+    .switch.on::before { transform:translateX(17px); }
+
+    .subpage-head { display:flex; align-items:center; gap:11px; margin:0 0 18px; }
+    .back-button { width:38px; height:38px; flex:0 0 auto; display:grid; place-items:center; border:0; border-radius:50%; background:white; color:var(--red); box-shadow:0 4px 16px rgba(0,0,0,.05); font-size:1.35rem; }
+    .subpage-head h1 { margin:0; font-size:1.42rem; line-height:1.15; letter-spacing:-.04em; }
+    .subpage-head p { margin:3px 0 0; color:var(--muted); font-size:.72rem; }
+    .detail-card { padding:17px; border-radius:22px; background:white; border:.5px solid var(--line); box-shadow:0 7px 24px rgba(0,0,0,.04); }
+    .detail-card + .detail-card { margin-top:12px; }
+    .detail-card h2 { margin:0 0 6px; font-size:1rem; }
+    .detail-card > p { margin:0; color:var(--muted); font-size:.76rem; line-height:1.6; }
+    .vehicle-visual { height:112px; margin:14px 0; border-radius:18px; display:grid; place-items:center; color:white; background:radial-gradient(circle at 75% 24%,rgba(255,214,10,.46),transparent 6rem),linear-gradient(145deg,#171719,#343438); }
+    .vehicle-visual strong { display:block; font-size:1.14rem; text-align:center; }
+    .vehicle-visual span { display:block; margin-top:5px; color:#d1d1d6; font-size:.7rem; }
+    .spec-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; margin-top:13px; }
+    .spec { padding:12px; border-radius:15px; background:var(--paper); }
+    .spec strong { display:block; font-size:.94rem; }
+    .spec span { display:block; margin-top:3px; color:var(--muted); font-size:.65rem; }
+    .option-stack { display:grid; gap:9px; margin-top:13px; }
+    .option-button { width:100%; min-height:54px; display:flex; align-items:center; justify-content:space-between; padding:10px 13px; border:.5px solid var(--line); border-radius:16px; background:white; color:var(--ink); text-align:left; }
+    .option-button strong { font-size:.8rem; }
+    .option-button span { color:var(--muted); font-size:.67rem; }
+    .option-button.selected { border-color:var(--red); box-shadow:inset 3px 0 var(--red); }
+    .carbon-hero { padding:20px; border-radius:24px; color:white; background:linear-gradient(145deg,#12623f,#16845b); }
+    .carbon-hero small { color:rgba(255,255,255,.72); }
+    .carbon-hero strong { display:block; margin-top:8px; font-size:2.15rem; letter-spacing:-.06em; }
+    .carbon-bars { display:grid; gap:11px; margin-top:15px; }
+    .carbon-row { display:grid; grid-template-columns:50px 1fr 42px; gap:9px; align-items:center; font-size:.68rem; }
+    .bar-track { height:8px; overflow:hidden; border-radius:99px; background:#e5e5ea; }
+    .bar-track i { display:block; height:100%; border-radius:99px; background:var(--green); }
+    .privacy-status { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .permission-list { margin-top:12px; border-top:.5px solid var(--line); }
+    .permission-row { min-height:56px; display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:.5px solid var(--line); }
+    .permission-row strong { display:block; font-size:.78rem; }
+    .permission-row span { display:block; margin-top:3px; color:var(--muted); font-size:.64rem; }
+    .permission-badge { flex:0 0 auto; padding:5px 8px; border-radius:99px; background:var(--green-soft); color:var(--green); font-size:.63rem; font-weight:700; }
+
+    .bottom-nav { height:68px; display:grid; grid-template-columns:repeat(5,1fr); padding:5px 7px 7px; border-top:1px solid var(--line); background:rgba(255,253,250,.97); backdrop-filter:blur(16px); }
+    .nav-item { border:0; background:none; color:#8b8b8b; border-radius:12px; font-size:.61rem; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:3px; }
+    .nav-item svg { width:20px; height:20px; }
+    .nav-item.active { color:var(--red); font-weight:760; }
+
+    .insight-panel { max-width:400px; }
+    .insight-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    .insight-head h2 { margin:0; font-size:1.1rem; }
+    .prototype-label { padding:5px 8px; border-radius:99px; background:#1e1e1e; color:white; font-size:.62rem; letter-spacing:.06em; }
+    .insight-card { background:rgba(255,255,255,.78); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.9); border-radius:23px; padding:20px; box-shadow:0 18px 50px rgba(30,25,12,.08); }
+    .insight-card h3 { margin:0 0 12px; font-size:1rem; }
+    .insight-card p { margin:0; font-size:.84rem; color:#5c5c5c; line-height:1.7; }
+    .decision-list { margin-top:16px; display:grid; gap:10px; }
+    .decision { display:grid; grid-template-columns:10px 1fr auto; align-items:center; gap:10px; font-size:.76rem; }
+    .decision i { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px rgba(8,127,91,.10); }
+    .decision span { color:#676767; }
+    .decision strong { font-size:.73rem; }
+    .business-metrics { margin-top:18px; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .business-metric { border-top:1px solid #d9d5cb; padding-top:11px; }
+    .business-metric strong { display:block; font-size:1.25rem; letter-spacing:-.04em; }
+    .business-metric span { font-size:.67rem; color:#747474; }
+    .demo-guide { margin-top:15px; font-size:.74rem; line-height:1.65; color:#6a6a6a; }
+
+    .toast { position:absolute; z-index:50; left:50%; bottom:80px; transform:translate(-50%,20px); min-width:230px; max-width:320px; padding:12px 15px; border-radius:14px; background:#181818; color:white; box-shadow:0 15px 40px rgba(0,0,0,.2); font-size:.75rem; opacity:0; pointer-events:none; transition:.25s; text-align:center; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+
+    @media (max-width: 1180px) {
+      .workspace { grid-template-columns:1fr 390px; }
+      .story-panel { max-width:500px; }
+      .insight-panel { display:none; }
+    }
+    @media (max-width: 820px) {
+      body { background:#171717; }
+      .workspace { display:block; min-height:100vh; padding:0; }
+      .story-panel, .insight-panel { display:none; }
+      .device { width:100%; height:100vh; min-height:620px; border:0; border-radius:0; box-shadow:none; }
+      .device::before { display:none; }
+      .statusbar { padding-top:max(4px, env(safe-area-inset-top)); height:calc(35px + env(safe-area-inset-top)); }
+      .viewport { height:calc(100% - 35px - env(safe-area-inset-top) - 58px - 68px); }
+    }
+    /* iOS-inspired mobile redesign */
+    :root {
+      --ink: #111114;
+      --muted: #73737a;
+      --line: rgba(60, 60, 67, .13);
+      --paper: #f2f2f7;
+      --soft: #f2f2f7;
+      --yellow: #ffd60a;
+      --yellow-soft: #fff5bf;
+      --red: #d70015;
+      --green: #16845b;
+      --green-soft: #e7f7ef;
+      --shadow: 0 28px 80px rgba(24, 24, 28, .20);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", sans-serif;
+      background: #e9e9ee;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255, 214, 10, .22), transparent 25rem),
+        radial-gradient(circle at 85% 78%, rgba(215, 0, 21, .08), transparent 30rem),
+        #e9e9ee;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .workspace { grid-template-columns: minmax(380px, 1fr) 393px minmax(340px, .85fr); gap: 44px; }
+
+    .device {
+      width: 393px;
+      height: min(852px, calc(100dvh - 32px));
+      min-height: 700px;
+      display: flex;
+      flex-direction: column;
+      border: 8px solid #111114;
+      border-radius: 51px;
+      background: var(--paper);
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,.75) inset;
+    }
+    .device::before { top: 10px; width: 104px; height: 28px; border-radius: 18px; background: #111114; }
+
+    .statusbar {
+      height: 39px;
+      padding: 5px 24px 0;
+      background: rgba(242,242,247,.94);
+      font-size: .72rem;
+      letter-spacing: -.01em;
+    }
+
+    .app-header {
+      min-height: 61px;
+      padding: 8px 17px 10px;
+      background: rgba(242,242,247,.84);
+      border-bottom: .5px solid rgba(60,60,67,.10);
+      -webkit-backdrop-filter: saturate(180%) blur(22px);
+      backdrop-filter: saturate(180%) blur(22px);
+    }
+    .brand { gap: 10px; }
+    .brand-mark { width: 36px; height: 36px; box-shadow: inset 0 0 0 .5px rgba(140,105,0,.20), 0 4px 12px rgba(215,0,21,.10); }
+    .brand-name { font-size: .96rem; font-weight: 720; letter-spacing: -.025em; }
+    .brand-sub { margin-top: 1px; font-size: .66rem; color: #7f7f87; }
+    .header-button {
+      width: 37px;
+      height: 37px;
+      background: rgba(255,255,255,.82);
+      border: .5px solid rgba(60,60,67,.10);
+      box-shadow: 0 3px 12px rgba(0,0,0,.04);
+    }
+
+    .viewport { height: auto; min-height: 0; flex: 1 1 auto; background: var(--paper); scroll-behavior: smooth; }
+    .screen { padding: 19px 16px 34px; }
+    .screen-title { margin: 3px 0 5px; font-size: 1.72rem; font-weight: 760; line-height: 1.12; letter-spacing: -.055em; }
+    .screen-subtitle { margin-bottom: 18px; font-size: .82rem; line-height: 1.48; color: #77777f; }
+    .location-line { margin: 1px 2px 13px; font-size: .78rem; color: #67676e; }
+
+    .hero-card {
+      min-height: 205px;
+      padding: 20px;
+      border-radius: 28px;
+      background: radial-gradient(circle at 84% 22%, rgba(255,214,10,.52), transparent 7.4rem), linear-gradient(145deg, #161618 0%, #26262a 63%, #473700 100%);
+      box-shadow: 0 16px 34px rgba(17,17,20,.20), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .hero-card::after { border-color: rgba(255,214,10,.14); }
+    .eyebrow { font-size: .7rem; color: rgba(255,255,255,.65); }
+    .soc { font-size: 3.65rem; font-weight: 740; }
+    .soc small { color: var(--yellow); }
+    .need-line { border-top-color: rgba(255,255,255,.14); }
+    .hero-button { height: 46px; border-radius: 15px; background: var(--yellow); font-weight: 720; box-shadow: 0 7px 18px rgba(255,214,10,.18); }
+
+    .section-head { margin: 24px 2px 11px; }
+    .section-head h2 { font-size: 1.08rem; font-weight: 730; letter-spacing: -.03em; }
+    .section-head button { color: var(--red); font-size: .78rem; font-weight: 600; }
+
+    .station-card, .match-card, .list-card, .reward {
+      border: .5px solid rgba(60,60,67,.12);
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 7px 24px rgba(0,0,0,.045);
+    }
+    .station-card { border-radius: 23px; padding: 16px; }
+    .station-top h3 { font-size: .96rem; font-weight: 700; letter-spacing: -.02em; }
+    .score { width: 51px; height: 51px; background: var(--green-soft); }
+    .reason { margin: 14px 0 13px; padding: 11px 12px; border-radius: 14px; background: #fff8d7; }
+    .station-metrics, .power-chart { border-color: var(--line); }
+    .metric { border-right-color: var(--line); }
+    .metric strong { font-size: .86rem; font-weight: 690; }
+    .btn { min-height: 44px; border: .5px solid var(--line); border-radius: 14px; font-size: .83rem; font-weight: 650; background: rgba(255,255,255,.96); }
+    .btn.primary { border-color: var(--red); background: var(--red); }
+    .btn.dark { background: #1c1c1e; border-color: #1c1c1e; }
+    .btn.yellow { background: var(--yellow); border-color: var(--yellow); }
+
+    .quick-grid { gap: 9px; }
+    .quick { min-height: 78px; padding: 11px 3px; border-radius: 18px; background: rgba(255,255,255,.94); border: .5px solid rgba(60,60,67,.08); box-shadow: 0 5px 18px rgba(0,0,0,.035); }
+    .quick-icon { width: 32px; height: 32px; border-radius: 10px; background: #f2f2f7; }
+    .quick span { font-size: .69rem; font-weight: 620; }
+    .campaign-card { border-radius: 23px; padding: 17px; background: linear-gradient(135deg, #fff3a8, #ffd60a); box-shadow: 0 8px 22px rgba(160,125,0,.10); }
+
+    .vehicle-card { padding: 15px; border-radius: 20px; background: rgba(255,255,255,.82); border: .5px solid var(--line); }
+    .choice { padding: 9px 14px; border: .5px solid var(--line); background: rgba(255,255,255,.88); font-size: .75rem; }
+    .choice.selected { background: #1c1c1e; border-color: #1c1c1e; }
+    .match-card { border-radius: 21px; padding: 15px; margin-bottom: 11px; }
+    .match-card.recommended { border-color: rgba(215,0,21,.24); box-shadow: inset 3px 0 var(--red), 0 7px 24px rgba(0,0,0,.045); }
+
+    .detail-hero { height: 151px; border-radius: 26px; background: linear-gradient(145deg,#171719,#35353a); box-shadow: 0 14px 30px rgba(17,17,20,.15); }
+    .availability { border-radius: 20px; border: .5px solid var(--line); box-shadow: 0 10px 26px rgba(0,0,0,.08); }
+    .ai-note { border-radius: 18px; background: #fff7cc; }
+    .price-slot { border-radius: 14px; background: rgba(255,255,255,.92); border: .5px solid var(--line); }
+    .facility { border: .5px solid var(--line); border-radius: 14px; }
+    .sticky-actions { background: rgba(242,242,247,.86); border-top: .5px solid rgba(60,60,67,.16); -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px); }
+
+    .charge-ring { width: 196px; height: 196px; background: conic-gradient(var(--yellow) calc(var(--charge) * 1%), rgba(60,60,67,.10) 0); box-shadow: 0 13px 34px rgba(0,0,0,.06); }
+    .charge-ring::before { background: var(--paper); }
+    .charge-stats { border-radius: 21px; background: #1c1c1e; }
+    .power-chart i { background: linear-gradient(to top, var(--red), #ff7b72); }
+
+    .activity-hero { border-radius: 27px; background: linear-gradient(145deg,#df001c,#970012); box-shadow: 0 14px 34px rgba(160,0,20,.18); }
+    .reward-grid { gap: 11px; }
+    .reward { border-radius: 21px; min-height: 118px; }
+    .reward.selected { border: 2px solid var(--red); box-shadow: 0 8px 22px rgba(215,0,21,.08); }
+    .explain-box { border: 0; background: rgba(255,255,255,.92); border-radius: 19px; box-shadow: 0 6px 20px rgba(0,0,0,.04); }
+
+    .profile-hero { border-radius: 27px; background: linear-gradient(145deg,#171719,#2d2d31); box-shadow: 0 14px 32px rgba(17,17,20,.15); }
+    .list-card { border-radius: 21px; }
+    .list-row { min-height: 65px; border-bottom: .5px solid var(--line); }
+    .list-icon { background: #f2f2f7; }
+    .switch { background: #d1d1d6; }
+    .switch.on { background: #34c759; }
+
+    .bottom-nav { height: 76px; padding: 7px 8px calc(8px + env(safe-area-inset-bottom)); border-top: .5px solid rgba(60,60,67,.16); background: rgba(249,249,251,.84); -webkit-backdrop-filter: saturate(180%) blur(25px); backdrop-filter: saturate(180%) blur(25px); }
+    .nav-item { min-height: 50px; border-radius: 14px; color: #8e8e93; }
+    .nav-item svg { width: 20px; height: 20px; }
+    .nav-item span { font-size: .63rem; font-weight: 590; }
+    .nav-item.active { color: var(--red); background: rgba(215,0,21,.06); }
+    .toast { bottom: 88px; border-radius: 16px; background: rgba(28,28,30,.93); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); font-size: .78rem; }
+
+    @media (max-width: 1180px) and (min-width: 821px) {
+      .workspace { grid-template-columns: minmax(330px,1fr) 393px; gap: 34px; }
+    }
+
+    @media (max-width: 820px) {
+      html, body { width: 100%; height: var(--app-height, 100dvh); min-height: 0; overflow: hidden; background: var(--paper); }
+      html.upma-host { --host-reserve: 88px; }
+      .workspace { width: 100%; height: var(--app-height, 100dvh); min-height: 0; padding: 0; overflow: hidden; }
+      .device { width: 100%; max-width: none; height: calc(var(--app-height, 100dvh) - var(--host-reserve, 0px)); min-height: 0; border: 0; border-radius: 0; box-shadow: none; }
+      body:has([data-shangma-branding]) .device { --host-reserve: 88px; }
+      .device::before { display: none; }
+      .statusbar { display: none; }
+      .app-header { min-height: 56px; flex: 0 0 auto; padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 9px max(16px, env(safe-area-inset-left)); }
+      .viewport { height: auto; min-height: 0; flex: 1 1 auto; }
+      .screen { width: 100%; max-width: 520px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+      .bottom-nav { position: relative; flex: 0 0 auto; height: auto; min-height: 64px; padding: 6px max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
+    }
+
+    @media (max-width: 360px) {
+      .screen { padding-left: 13px; padding-right: 13px; }
+      .hero-card { padding: 17px; border-radius: 24px; }
+      .station-card { padding: 14px; }
+      .station-metrics { grid-template-columns: repeat(2, 1fr); gap: 10px 0; }
+      .metric:nth-child(2) { border-right: 0; }
+      .quick-grid { gap: 6px; }
+      .quick span { font-size: .63rem; }
+      .reward-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="workspace">
+    <section class="story-panel" aria-label="产品说明">
+      <div class="story-kicker">Shell × Hangzhou · AI Energy Brain</div>
+      <h1>让一次充电<br /><span>全程心里有数</span></h1>
+      <p>原型以杭州跨品牌新能源车主为主角。AI不要求用户学习新功能，而是在选站、到站、充电、异常和复充五个时刻，减少不确定性。</p>
+      <div class="journey-summary" id="journeySummary">
+        <div class="journey-step active" data-journey="home"><span class="num">01</span><strong>出发前</strong><span>预测最确定的站</span></div>
+        <div class="journey-step" data-journey="station"><span class="num">02</span><strong>临近到站</strong><span>可用枪与停车引导</span></div>
+        <div class="journey-step" data-journey="charge"><span class="num">03</span><strong>充电进行</strong><span>功率与完成时间可解释</span></div>
+        <div class="journey-step" data-journey="charge"><span class="num">04</span><strong>发生异常</strong><span>系统先发现并给下一步</span></div>
+        <div class="journey-step" data-journey="rewards"><span class="num">05</span><strong>充电结束</strong><span>匹配真正有效的权益</span></div>
+      </div>
+    </section>
+
+    <section class="device" aria-label="壳牌杭州AI智充小程序">
+      <div class="statusbar"><span>09:41</span><div class="status-icons"><div class="signal"><i></i><i></i><i></i><i></i></div><span>5G</span><div class="battery-icon"></div></div></div>
+      <header class="app-header">
+        <div class="brand"><div class="brand-mark" aria-hidden="true"></div><div><div class="brand-name">壳牌杭州 AI 智充</div><div class="brand-sub">跨品牌补能服务 · 概念原型</div></div></div>
+        <button class="header-button" id="notificationButton" aria-label="查看消息">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+        </button>
+      </header>
+      <div class="viewport" id="viewport"></div>
+      <nav class="bottom-nav" aria-label="主导航">
+        <button class="nav-item active" data-route="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg><span>首页</span></button>
+        <button class="nav-item" data-route="match"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 7v8M7 11h8"/></svg><span>智选</span></button>
+        <button class="nav-item" data-route="charge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 2h10v20H7zM9 5h6v4H9zM17 7h2l2 3v5a2 2 0 0 1-4 0v-3"/></svg><span>充电</span></button>
+        <button class="nav-item" data-route="rewards"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 7v14M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7ZM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7Z"/></svg><span>权益</span></button>
+        <button class="nav-item" data-route="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>我的</span></button>
+      </nav>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </section>
+
+    <aside class="insight-panel" aria-label="AI决策说明">
+      <div class="insight-head"><h2>AI此刻如何决策</h2><span class="prototype-label">路演辅助视图</span></div>
+      <div class="insight-card">
+        <h3 id="insightTitle">从“最近”改为“最确定”</h3>
+        <p id="insightCopy">系统综合路程、未来排队、车型受电能力、价格、停车费与到站可用概率，推荐总耗时更短且成功率更高的站点。</p>
+        <div class="decision-list" id="decisionList"></div>
+        <div class="business-metrics" id="businessMetrics"></div>
+      </div>
+      <p class="demo-guide">演示建议：从首页点击“AI规划补能”，进入站点排序；打开推荐站并预约，再进入充电页展示功率解释；最后进入权益页说明个性化活动如何提高复充。</p>
+    </aside>
+  </main>
+
+  <script>
+    function syncAppViewport() {
+      const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.documentElement.style.setProperty('--app-height', `${Math.round(height)}px`);
+    }
+
+    if (location.hostname.endsWith('.upma.site')) {
+      document.documentElement.classList.add('upma-host');
+    }
+    syncAppViewport();
+    window.addEventListener('resize', syncAppViewport, { passive: true });
+    window.visualViewport?.addEventListener('resize', syncAppViewport, { passive: true });
+
+    const icons = {
+      pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+      scan: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5M8 8h8v8H8z"/></svg>',
+      calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v16H4zM8 3v4M16 3v4M4 10h16"/></svg>',
+      leaf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 4C11 4 5 8 5 15c0 3 2 5 5 5 7 0 10-7 10-16Z"/><path d="M4 21c3-6 7-9 12-12"/></svg>',
+      support: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 5 2c-1 1-2 1-2 3M12 18h.01"/></svg>'
+    };
+
+    const stations = [
+      { id:'boaolu', name:'壳牌杭州博奥路充电站', distance:'2.8km', drive:8, wait:4, p90:7, available:6, total:20, power:120, price:1.03, success:96, score:94, tags:['总耗时最短','一次启动成功率高','停车首小时免费'] },
+      { id:'fengqing', name:'壳牌杭州风情大道充电站', distance:'3.6km', drive:11, wait:2, p90:6, available:11, total:28, power:180, price:1.18, success:94, score:91, tags:['空枪较多','支持更高功率','价格略高'] },
+      { id:'dali', name:'壳牌达利中国充电站', distance:'4.1km', drive:13, wait:0, p90:3, available:4, total:8, power:120, price:.89, success:92, score:87, tags:['当前无需等待','低谷价格更优','绕行时间较长'] }
+    ];
+
+    const state = {
+      route: location.hash.replace('#/','') || 'home',
+      priority: '省时间',
+      station: stations[0],
+      reserved: false,
+      charging: false,
+      charge: 25,
+      reward: '停车减免',
+      privacy: true
+    };
+
+    const insights = {
+      home: {
+        title:'从“最近”改为“最确定”',
+        copy:'系统综合路程、未来排队、车型受电能力、价格、停车费与到站可用概率，推荐总耗时更短且成功率更高的站点。',
+        decisions:[['需求预测','未来60分钟'],['到站可用概率','96%'],['推荐目标','总耗时最低']],
+        metrics:[['+2.0pp','利用率目标'],['-6分钟','平均等待目标'],['96%','到站成功率'],['1.03元','预计每度费用']]
+      },
+      match: {
+        title:'每个用户看到不同排序',
+        copy:'时间敏感用户优先总耗时和可靠性；价格敏感用户提高服务费权重；低碳偏好用户优先光伏出力高、负荷较低的时段。',
+        decisions:[['用户分层','时间敏感型'],['排序模型','广义成本'],['风险输出','P50 / P90']],
+        metrics:[['94分','推荐匹配度'],['4分钟','预计等待'],['7分钟','P90等待'],['6把','预计可用枪']]
+      },
+      station: {
+        title:'推荐要对到站履约负责',
+        copy:'AI持续读取设备通信、电流和温度状态。异常枪自动降权，预约只锁定短时间，避免空占资源；若状态变化，系统在到站前改派。',
+        decisions:[['异常检测','分钟级'],['短时预约','10分钟'],['备用方案','邻近站改派']],
+        metrics:[['96%','一次启动成功'],['4分钟','预计等待'],['120kW','车型适配'],['20把','站内总枪数']]
+      },
+      charge: {
+        title:'让功率变化可预测、可解释',
+        copy:'完成时间由车辆受电曲线、目标SOC、站内并发与配变容量共同预测。系统每15分钟重算功率，并优先保障用户离站需求。',
+        decisions:[['完成时间预测','分位数回归'],['枪级功率','滚动优化'],['异常识别','实时曲线']],
+        metrics:[['116kW','当前功率'],['26分钟','预计完成'],['80%','目标SOC'],['8.6kg','本次减排估算']]
+      },
+      rewards: {
+        title:'奖励真正会被改变的用户',
+        copy:'系统比较“发权益”和“不发权益”的复充差异，只向可被改变的用户投放，并在活动后用对照实验核验增量毛利。',
+        decisions:[['用户分群','通勤高频'],['模型','Uplift'],['核验方式','A/B测试']],
+        metrics:[['+8.4%','预测复充增量'],['12元','权益成本'],['3.1×','增量ROI'],['30天','观察窗口']]
+      },
+      profile: {
+        title:'画像服务于决策，不做标签堆砌',
+        copy:'用户可查看和关闭个性化。画像只保留补能决策所需的频次、时段、价格敏感度、车型功率和服务偏好，并记录授权范围。',
+        decisions:[['核心分层','时间敏感型'],['数据范围','最小必要'],['控制权','用户可关闭']],
+        metrics:[['14次','近30天充电'],['68%','低谷充电占比'],['112kg','本月减排估算'],['¥86','本月节省']]
+      }
+    };
+
+    function homeView(){
+      return `<section class="screen">
+        <div class="location-line">${icons.pin}<span>杭州 · 滨江区 · 钱江世纪城附近</span></div>
+        <div class="hero-card">
+          <div class="eyebrow">车辆状态 · 已授权读取</div>
+          <div class="hero-row"><div class="soc">25<small>%</small></div><div class="range">预计剩余里程<strong>118 km</strong></div></div>
+          <div class="need-line"><span>今晚还需行驶约82km</span><strong>建议18:30前补能</strong></div>
+          <button class="hero-button" data-route="match">AI规划本次补能</button>
+        </div>
+
+        <div class="section-head"><h2>为你推荐</h2><button data-route="match">查看全部</button></div>
+        ${stationCard(stations[0], true)}
+
+        <div class="section-head"><h2>快捷服务</h2></div>
+        <div class="quick-grid">
+          <button class="quick" data-route="charge"><div class="quick-icon">${icons.scan}</div><span>扫码充电</span></button>
+          <button class="quick" data-action="reserve"><div class="quick-icon">${icons.calendar}</div><span>预约枪位</span></button>
+          <button class="quick" data-route="carbon"><div class="quick-icon">${icons.leaf}</div><span>碳账单</span></button>
+          <button class="quick" data-action="support"><div class="quick-icon">${icons.support}</div><span>遇到问题</span></button>
+        </div>
+
+        <div class="section-head"><h2>为你匹配的活动</h2><button data-route="rewards">更多权益</button></div>
+        <button class="campaign-card" data-route="rewards" style="width:100%;border:0;text-align:left">
+          <div><span class="tag">国庆错峰能量周</span><h3>18:00前到站，停车减免12元</h3><p>根据你的通勤时段与停车偏好匹配</p></div>
+          <div class="campaign-value"><strong>3.1×</strong>预测增量ROI</div>
+        </button>
+      </section>`;
+    }
+
+    function stationCard(s, compact=false){
+      return `<article class="station-card">
+        <div class="station-top"><div><h3>${s.name}</h3><p>${s.distance} · 驾车${s.drive}分钟 · 营业至24:00</p></div><div class="score"><div><strong>${s.score}</strong>AI匹配</div></div></div>
+        <div class="reason">推荐理由：预计等待${s.wait}分钟，车型可用${s.power}kW功率，到站可启动概率${s.success}%。</div>
+        <div class="station-metrics"><div class="metric"><strong>${s.available}/${s.total}</strong><span>预计空枪</span></div><div class="metric"><strong>${s.wait}min</strong><span>预计等待</span></div><div class="metric"><strong>${s.power}kW</strong><span>适配功率</span></div><div class="metric"><strong>¥${s.price.toFixed(2)}</strong><span>预计每度</span></div></div>
+        <div class="station-actions"><button class="btn" data-station="${s.id}">查看详情</button><button class="btn primary" data-action="reserve" data-station="${s.id}">${state.reserved && state.station.id===s.id ? '已预约 · 查看' : '预约并导航'}</button></div>
+      </article>`;
+    }
+
+    function matchView(){
+      const ordered = [...stations].sort((a,b)=>{
+        const weights = state.priority==='省钱' ? s=>s.price*45+s.drive+s.wait : state.priority==='更可靠' ? s=>(100-s.success)*5+s.wait+s.drive : state.priority==='低碳' ? s=>s.price*12+s.wait+s.drive*.6 : s=>s.drive+s.wait*1.5;
+        return weights(a)-weights(b);
+      });
+      return `<section class="screen">
+        <h1 class="screen-title">AI智选充电站</h1><p class="screen-subtitle">根据本次需求实时排序，结果会随排队和设备状态更新</p>
+        <div class="vehicle-card"><div><strong>跨品牌纯电车型 · 当前SOC 25%</strong><span>最高受电功率170kW · 目标SOC 80%</span></div><div class="mini-car" aria-hidden="true"></div></div>
+        <div class="section-head"><h2>这次你更在意</h2></div>
+        <div class="profile-strip">${['省时间','省钱','更可靠','低碳'].map(x=>`<button class="choice ${state.priority===x?'selected':''}" data-priority="${x}">${x}</button>`).join('')}</div>
+        <div class="section-head"><h2>推荐排序</h2><button data-action="explain">为什么这样排</button></div>
+        ${ordered.map((s,i)=>`<article class="match-card ${i===0?'recommended':''}" data-station="${s.id}">
+          <div class="match-rank"><div class="rank-num">${i+1}</div><div class="match-main"><div class="match-title"><h3>${s.name}</h3><strong>${s.score}分</strong></div><div class="match-line">${s.distance} · 路上${s.drive}分钟 · 等待${s.wait}分钟 · ¥${s.price.toFixed(2)}/度</div><div class="why">${s.tags.map(t=>`<span>${t}</span>`).join('')}</div></div></div>
+        </article>`).join('')}
+      </section>`;
+    }
+
+    function stationView(){ const s=state.station; return `<section class="screen">
+      <button class="choice" data-route="match" style="margin-bottom:12px">返回智选</button>
+      <div class="detail-hero"><h2>${s.name}</h2><p>${s.distance} · 驾车${s.drive}分钟</p><div class="map-road r1"></div><div class="map-road r2"></div><div class="map-road r3"></div><div class="station-pin"></div></div>
+      <div class="availability"><strong>${s.available}</strong><div><b>预计空枪</b><span>共${s.total}把，状态实时更新</span></div><div class="wait"><strong>P50 ${s.wait}分钟</strong><span>P90 ${s.p90}分钟</span></div></div>
+      <div class="section-head"><h2>AI到站建议</h2></div>
+      <div class="ai-note"><div class="ai-dot">AI</div><div>建议18:12前出发。预计18:20到站，届时仍可直接启动的概率为${s.success}%；如设备状态变化，将在到站前为你改派。</div></div>
+      <div class="section-head"><h2>今日价格</h2><button data-action="price">查看计价说明</button></div>
+      <div class="price-timeline"><div class="price-slot"><strong>¥1.32</strong><span>17–18时</span></div><div class="price-slot best"><strong>¥${s.price.toFixed(2)}</strong><span>18–21时</span></div><div class="price-slot"><strong>¥0.86</strong><span>21–24时</span></div><div class="price-slot"><strong>¥0.63</strong><span>0–8时</span></div></div>
+      <div class="section-head"><h2>场站服务</h2></div>
+      <div class="facility-list"><div class="facility"><b>24h</b>便利店</div><div class="facility"><b>1h</b>停车减免</div><div class="facility"><b>4席</b>休息区</div><div class="facility"><b>可用</b>洗车服务</div></div>
+      <div class="sticky-actions"><button class="btn" data-action="navigate">路线预览</button><button class="btn primary" data-action="reserve">${state.reserved ? '已预约 · 开始充电' : '预约10分钟并导航'}</button></div>
+    </section>`; }
+
+    function chargeView(){
+      const bars=[35,46,58,72,84,91,96,100,98,95,93,90,88,84,80,75,69,63,56,50,43,37,31,26];
+      return `<section class="screen">
+        <div class="charge-center"><div class="eyebrow" style="color:var(--muted)">${state.charging?'充电进行中':'充电准备就绪'} · 博奥路站 08号枪</div>
+          <div class="charge-ring" style="--charge:${state.charge}"><div class="charge-value"><strong>${state.charge}<small style="font-size:1.2rem">%</small></strong><span>${state.charging?'目标80%':'当前电量'}</span></div></div>
+        </div>
+        <div class="charge-stats"><div><strong>${state.charging?'116':'—'} kW</strong><span>实时功率</span></div><div><strong>${state.charging?'26':'—'} min</strong><span>预计完成</span></div><div><strong>${state.charging?'¥18.6':'¥0.0'}</strong><span>当前费用</span></div></div>
+        <div class="section-head"><h2>功率曲线</h2><button data-action="power">AI解释</button></div>
+        <div class="power-chart">${bars.map(h=>`<i style="height:${state.charging?h:8}%"></i>`).join('')}</div>
+        <p class="screen-subtitle" style="margin-top:6px">根据车辆受电曲线和站内并发预测，70%后功率将逐步下降</p>
+        <div class="ai-note"><div class="ai-dot">AI</div><div>${state.charging?'当前站内有11辆车同时充电。系统优先保障你的18:48离站目标，并在配变安全范围内为08号枪分配116kW。':'插枪后系统将核验车型、设备和支付状态，再生成本次功率计划。'}</div></div>
+        <div class="section-head"><h2>本次低碳账单</h2></div>
+        <div class="station-card"><div class="station-metrics"><div class="metric"><strong>${state.charging?'32.4':'0'}kWh</strong><span>已充电量</span></div><div class="metric"><strong>${state.charging?'68':'0'}%</strong><span>低碳时段占比</span></div><div class="metric"><strong>${state.charging?'8.6':'0'}kg</strong><span>减排估算</span></div><div class="metric"><strong>${state.charging?'¥6.2':'¥0'}</strong><span>错峰节省</span></div></div></div>
+        <div class="station-actions"><button class="btn" data-action="support">充电异常</button><button class="btn ${state.charging?'dark':'yellow'}" data-action="toggleCharge">${state.charging?'结束充电':'模拟开始充电'}</button></div>
+      </section>`;
+    }
+
+    function rewardsView(){ return `<section class="screen">
+      <h1 class="screen-title">你的专属权益</h1><p class="screen-subtitle">只推荐与你本次场景有关的活动，可随时关闭个性化</p>
+      <div class="activity-hero"><div class="label">国庆错峰能量周 · 杭州限定</div><h2>18:00前到站<br/>选一项真正有用的权益</h2><p>你常在工作日晚高峰充电。提前30分钟到站既能降低等待，也能帮助场站削峰。</p></div>
+      <div class="section-head"><h2>请选择本次权益</h2><button data-action="explainReward">AI为什么推荐</button></div>
+      <div class="reward-grid">${[
+        ['停车减免','12元','适合停留20—40分钟'],['精品咖啡','免费1杯','适合充电等待'],['标准洗车','立减20元','你近90天使用过2次'],['下次充电','9折券','7天内再次使用']
+      ].map(([n,v,d])=>`<button class="reward ${state.reward===n?'selected':''}" data-reward="${n}"><span class="check">✓</span><small>${d}</small><strong>${v}</strong><span>${n}</span></button>`).join('')}</div>
+      <div class="section-head"><h2>推荐依据</h2></div>
+      <div class="explain-box">你属于“时间敏感型通勤车主”，对停车成本的敏感度高于充电价格。模型预计“停车减免”比通用充电券带来更高的30天复充增量。该判断会通过活动对照组持续校准。</div>
+      <button class="btn primary" data-action="claim" style="width:100%;margin-top:14px">领取${state.reward}</button>
+    </section>`; }
+
+    function profileView(){ return `<section class="screen">
+      <h1 class="screen-title">我的能源账户</h1><p class="screen-subtitle">画像、车辆、碳账单和隐私授权都由你控制</p>
+      <div class="profile-hero"><div class="profile-top"><div class="avatar">周</div><div><h2>周先生 · 金卡会员</h2><p>加入壳牌智充第286天</p></div></div><div class="profile-tags"><span>时间敏感型</span><span>工作日晚高峰</span><span>偏好可靠站点</span><span>偶尔价格敏感</span></div><div class="summary-row"><div><strong>14次</strong><span>近30天充电</span></div><div><strong>¥86</strong><span>本月节省</span></div><div><strong>112kg</strong><span>减排估算</span></div></div></div>
+      <div class="section-head"><h2>车辆与补能偏好</h2></div>
+      <div class="list-card"><button class="list-row" data-route="vehicle"><div class="list-icon">车</div><div><strong>跨品牌纯电车型</strong><span>最高受电170kW · 电池78kWh</span></div><span class="chev">›</span></button><button class="list-row" data-route="preference"><div class="list-icon">偏</div><div><strong>补能偏好：${state.priority}</strong><span>等待超过10分钟时自动推荐备选站</span></div><span class="chev">›</span></button></div>
+      <div class="section-head"><h2>碳与数据</h2></div>
+      <div class="list-card"><button class="list-row" data-route="carbon"><div class="list-icon">碳</div><div><strong>2026年9月碳账单</strong><span>充电486kWh · 低碳时段占比68%</span></div><span class="chev">›</span></button><button class="list-row" data-route="personalization"><div class="list-icon">AI</div><div><strong>个性化推荐</strong><span>使用最小必要数据，可随时关闭</span></div><span class="chev">›</span></button><button class="list-row" data-route="data-auth"><div class="list-icon">权</div><div><strong>数据授权记录</strong><span>车辆、订单和位置权限明细</span></div><span class="chev">›</span></button></div>
+      <p class="screen-subtitle" style="margin-top:14px">碳减排为基于分时电力排放因子的估算值，不代表可交易碳资产。</p>
+    </section>`; }
+
+    function subpageHead(title, subtitle){ return `<div class="subpage-head"><button class="back-button" data-route="profile" aria-label="返回我的">‹</button><div><h1>${title}</h1><p>${subtitle}</p></div></div>`; }
+
+    function vehicleView(){ return `<section class="screen">
+      ${subpageHead('我的车辆','用于匹配可用功率、充电时间与站点')}
+      <div class="detail-card"><h2>跨品牌纯电车型</h2><p>车辆信息已授权读取，原型不展示车牌与车辆识别码。</p><div class="vehicle-visual"><div><strong>78 kWh 纯电车型</strong><span>当前SOC 25% · 预计续航118km</span></div></div><div class="spec-grid"><div class="spec"><strong>170kW</strong><span>最高受电功率</span></div><div class="spec"><strong>80%</strong><span>默认目标SOC</span></div><div class="spec"><strong>CCS2</strong><span>快充接口</span></div><div class="spec"><strong>已校准</strong><span>受电曲线状态</span></div></div></div>
+      <div class="detail-card"><h2>AI如何使用</h2><p>根据电池容量、当前电量和受电曲线，预测每座站的真实完成时间；不会只按充电桩标称功率排序。</p><button class="btn" data-action="editVehicle" style="width:100%;margin-top:13px">更新车辆信息</button></div>
+    </section>`; }
+
+    function preferenceView(){ return `<section class="screen">
+      ${subpageHead('补能偏好','你可以随时改变本次推荐目标')}
+      <div class="detail-card"><h2>优先目标</h2><p>AI会据此调整路程、排队、价格、可靠性和低碳时段的权重。</p><div class="option-stack">${[['省时间','优先总耗时与到站可用率'],['省钱','优先电价、服务费和停车成本'],['更可靠','优先一次启动成功率和健康枪位'],['低碳','优先低碳时段和可再生能源消纳']].map(([name,desc])=>`<button class="option-button ${state.priority===name?'selected':''}" data-priority="${name}"><div><strong>${name}</strong><span>${desc}</span></div><b>${state.priority===name?'✓':'›'}</b></button>`).join('')}</div></div>
+      <div class="detail-card"><h2>自动改派规则</h2><p>预计等待超过10分钟、到站可启动概率低于85%，或预约枪出现故障时，自动推荐附近备选站。</p></div>
+    </section>`; }
+
+    function carbonView(){ return `<section class="screen">
+      ${subpageHead('2026年9月碳账单','每一笔减排都有订单与时段依据')}
+      <div class="carbon-hero"><small>本月减排估算</small><strong>112 kgCO₂e</strong><small>充电486kWh · 低碳时段占比68%</small></div>
+      <div class="detail-card" style="margin-top:12px"><h2>分时充电结构</h2><div class="carbon-bars"><div class="carbon-row"><span>低碳</span><div class="bar-track"><i style="width:68%"></i></div><strong>68%</strong></div><div class="carbon-row"><span>平时</span><div class="bar-track"><i style="width:22%;background:var(--yellow)"></i></div><strong>22%</strong></div><div class="carbon-row"><span>高峰</span><div class="bar-track"><i style="width:10%;background:var(--red)"></i></div><strong>10%</strong></div></div><div class="spec-grid"><div class="spec"><strong>¥86</strong><span>错峰节省</span></div><div class="spec"><strong>14次</strong><span>本月充电</span></div></div></div>
+      <div class="detail-card"><h2>核算口径</h2><p>根据订单电量、充电时段与分时电力排放因子估算，并与无智能调度基准比较；结果用于个人反馈，不代表可交易碳资产。</p><button class="btn" data-action="carbonDetail" style="width:100%;margin-top:13px">查看订单明细</button></div>
+    </section>`; }
+
+    function personalizationView(){ return `<section class="screen">
+      ${subpageHead('个性化推荐','由你决定AI是否使用补能偏好')}
+      <div class="detail-card"><div class="privacy-status"><div><h2>个性化推荐</h2><p>${state.privacy?'已开启：为你优化站点和权益':'已关闭：仅展示通用排序'}</p></div><button class="switch ${state.privacy?'on':''}" data-action="privacy" aria-label="切换个性化推荐"></button></div></div>
+      <div class="detail-card"><h2>最小必要数据</h2><div class="permission-list"><div class="permission-row"><div><strong>车辆能力</strong><span>电池容量、受电功率、当前SOC</span></div><span class="permission-badge">用于充电预测</span></div><div class="permission-row"><div><strong>补能行为</strong><span>常用时段、等待与价格偏好</span></div><span class="permission-badge">用于站点排序</span></div><div class="permission-row"><div><strong>权益反馈</strong><span>领取、核销与30天复充结果</span></div><span class="permission-badge">用于增量评估</span></div></div></div>
+      <div class="detail-card"><h2>用户控制</h2><p>关闭后不再使用个体画像参与推荐；历史授权与处理记录仍可在“数据授权记录”中查看。</p></div>
+    </section>`; }
+
+    function dataAuthView(){ return `<section class="screen">
+      ${subpageHead('数据授权记录','清楚知道哪些数据被用于什么决策')}
+      <div class="detail-card"><h2>当前授权</h2><div class="permission-list"><div class="permission-row"><div><strong>车辆状态</strong><span>最近使用：今天18:02</span></div><span class="permission-badge">已授权</span></div><div class="permission-row"><div><strong>充电订单</strong><span>最近使用：今天18:05</span></div><span class="permission-badge">已授权</span></div><div class="permission-row"><div><strong>站点内位置</strong><span>仅在选站与导航期间使用</span></div><span class="permission-badge">使用时授权</span></div><div class="permission-row"><div><strong>会员权益</strong><span>最近使用：9月14日</span></div><span class="permission-badge">已授权</span></div></div></div>
+      <div class="detail-card"><h2>隐私原则</h2><p>数据按决策目的最小化调用，支持查看、关闭和删除；关键推荐与权限变更保留审计记录。</p><button class="btn" data-action="exportAuth" style="width:100%;margin-top:13px">导出授权记录</button></div>
+    </section>`; }
+
+    function render(){
+      const view = document.getElementById('viewport');
+      const valid=['home','match','station','charge','rewards','profile','vehicle','preference','carbon','personalization','data-auth'];
+      if(!valid.includes(state.route)) state.route='home';
+      const views={home:homeView,match:matchView,station:stationView,charge:chargeView,rewards:rewardsView,profile:profileView,vehicle:vehicleView,preference:preferenceView,carbon:carbonView,personalization:personalizationView,'data-auth':dataAuthView};
+      view.innerHTML = views[state.route]();
+      view.scrollTop=0;
+      const profileRoutes=['profile','vehicle','preference','carbon','personalization','data-auth'];
+      document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.route===state.route || (state.route==='station' && b.dataset.route==='match') || (profileRoutes.includes(state.route) && b.dataset.route==='profile')));
+      document.querySelectorAll('.journey-step').forEach(el=>el.classList.toggle('active', el.dataset.journey===state.route || (state.route==='match' && el.dataset.journey==='home')));
+      updateInsight();
+    }
+
+    function updateInsight(){
+      const data=insights[state.route] || (['vehicle','preference','carbon','personalization','data-auth'].includes(state.route) ? insights.profile : insights.home);
+      document.getElementById('insightTitle').textContent=data.title;
+      document.getElementById('insightCopy').textContent=data.copy;
+      document.getElementById('decisionList').innerHTML=data.decisions.map(d=>`<div class="decision"><i></i><span>${d[0]}</span><strong>${d[1]}</strong></div>`).join('');
+      document.getElementById('businessMetrics').innerHTML=data.metrics.map(m=>`<div class="business-metric"><strong>${m[0]}</strong><span>${m[1]}</span></div>`).join('');
+    }
+
+    function navigate(route){ state.route=route; location.hash='#/'+route; render(); }
+    function selectStation(id){ const found=stations.find(s=>s.id===id); if(found) state.station=found; navigate('station'); }
+    let toastTimer;
+    function toast(message){ const el=document.getElementById('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2600); }
+
+    document.addEventListener('click', e=>{
+      const route=e.target.closest('[data-route]')?.dataset.route;
+      if(route){ navigate(route); return; }
+      const station=e.target.closest('[data-station]');
+      if(station && !station.dataset.action){ selectStation(station.dataset.station); return; }
+      const priority=e.target.closest('[data-priority]')?.dataset.priority;
+      if(priority){ state.priority=priority; render(); return; }
+      const reward=e.target.closest('[data-reward]')?.dataset.reward;
+      if(reward){ state.reward=reward; render(); return; }
+      const action=e.target.closest('[data-action]')?.dataset.action;
+      if(!action) return;
+      if(action==='reserve'){
+        const id=e.target.closest('[data-station]')?.dataset.station;
+        if(id) state.station=stations.find(s=>s.id===id) || state.station;
+        if(state.reserved && state.route==='station'){ navigate('charge'); return; }
+        state.reserved=true; toast(`已为你保留${state.station.name}枪位10分钟`); if(state.route!=='station') setTimeout(()=>navigate('station'),500); else render();
+      }
+      if(action==='toggleCharge'){
+        state.charging=!state.charging; if(state.charging){ state.charge=25; toast('08号枪启动成功，AI功率计划已生效'); } else { state.charge=68; toast('充电已安全结束，账单正在生成'); } render();
+      }
+      if(action==='support') toast('已完成远程诊断：设备通信正常，可一键转人工客服');
+      if(action==='navigate') toast('已生成路线：预计8分钟到达，入口在博奥路东侧');
+      if(action==='price') toast('价格由电能费与服务费组成，付款前展示完整明细');
+      if(action==='power') toast('当前功率受车型曲线与站内并发共同影响，预计完成时间误差±3分钟');
+      if(action==='explain') toast('当前选择“省时间”，排序优先总耗时、可用概率与一次启动成功率');
+      if(action==='explainReward') toast('Uplift模型比较不同权益对你复充行为的预测增量');
+      if(action==='claim') toast(`${state.reward}已领取，将在本次订单结算时自动使用`);
+      if(action==='privacy'){ state.privacy=!state.privacy; render(); toast(state.privacy?'个性化推荐已开启':'个性化推荐已关闭'); }
+      if(action==='editVehicle') toast('车辆更新入口已打开：原型展示中暂不保存真实车牌信息');
+      if(action==='carbonDetail') toast('已生成14笔订单的分时电量与减排核算明细');
+      if(action==='exportAuth') toast('授权记录已生成，正式版本支持下载与撤回授权');
+    });
+
+    document.getElementById('notificationButton').addEventListener('click',()=>toast('博奥路站预计18:20出现6把空枪'));
+    window.addEventListener('hashchange',()=>{ const route=location.hash.replace('#/',''); if(route && route!==state.route){ state.route=route; render(); }});
+    render();
+  </script>
+</body>
+</html>
